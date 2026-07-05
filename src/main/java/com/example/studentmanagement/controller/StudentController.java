@@ -1,10 +1,10 @@
 package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.dto.StudentRequestDto;
+import com.example.studentmanagement.dto.StudentResponseDto;
 import com.example.studentmanagement.entity.Student;
 import com.example.studentmanagement.service.StudentService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,19 +24,23 @@ public class StudentController {
     /*@PostMapping
     public Student createStudent(@RequestBody Student student){ return studentService.saveStudent(student); }*/
 
+    /*@PostMapping
+    public Student createStudent(@Valid @RequestBody StudentRequestDto dto) {return studentService.saveStudent(dto);}*/
+
     @PostMapping
-    public Student createStudent(@Valid @RequestBody StudentRequestDto dto) {return studentService.saveStudent(dto);}
+    public StudentResponseDto createStudent(@Valid @RequestBody StudentRequestDto dto) {return studentService.saveStudent(dto);}
 
     @GetMapping("/{id}")
-    public Student getStudentById(@PathVariable Long id) { return studentService.getStudentById(id);}
+    public StudentResponseDto getStudentById(@PathVariable Long id) { return studentService.getStudentById(id);}
 
     @GetMapping
-    public List<Student> getAllStudents() {
+    public List<StudentResponseDto> getAllStudents() {
         return studentService.getAllStudents();
     }
 
     @PutMapping("/{id}")
-    public Student updateStudent(@PathVariable  Long id  , @Valid @RequestBody StudentRequestDto dto) {
+    public StudentResponseDto updateStudent(@PathVariable  Long id  ,
+                                            @Valid @RequestBody StudentRequestDto dto) {
         return studentService.updateStudent(id,dto);
     }
 
