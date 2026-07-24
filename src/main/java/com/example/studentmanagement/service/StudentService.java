@@ -9,9 +9,13 @@ import com.example.studentmanagement.repository.StudentRepository;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class StudentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
     private final StudentRepository studentRepository;
 
     public StudentService(StudentRepository studentRepository) {
@@ -35,14 +39,20 @@ public class StudentService {
 
     public StudentResponseDto saveStudent(StudentRequestDto dto){
 
+        logger.info("Creating student with email: {} ", dto.getEmail());
+
         Student student = mapToStudent(dto);
 
         Student savedStudent= studentRepository.save(student);
+
+        logger.info("Student created with ID: {}",savedStudent.getId());
 
         return mapToResponseDto(savedStudent);
     }
 
     public StudentResponseDto getStudentById(Long id) {
+
+        logger.info("Fetching student with ID: {}",id);
 
         Student student = studentRepository.findById(id)
                 .orElseThrow(()->
@@ -53,15 +63,21 @@ public class StudentService {
 
     public List<StudentResponseDto> getAllStudents() {
 
+        logger.info("Fetching all students.");
+
         List<Student> students = studentRepository.findAll();
+
+        logger.info("Retrieved {} students ",students.size());
 
         return students.stream()
                 .map(this::mapToResponseDto)
                 .toList();
-
     }
 
     public StudentResponseDto updateStudent(Long id, StudentRequestDto dto) {
+
+        logger.info("Updating student with ID : {}",id);
+
         Student existingStudent = studentRepository.findById(id)
                 .orElseThrow(()-> new StudentNotFoundException(id));
 
@@ -70,12 +86,21 @@ public class StudentService {
         existingStudent.setEmail(dto.getEmail());
 
         Student updatedStudent = studentRepository.save(existingStudent);
+
+        logger.info("Student updated successfully with Student id: {}",updatedStudent.getId());
+
         return mapToResponseDto(updatedStudent);
     }
 
     public void deleteStudent(Long id){
+
+        logger.info("Deleting student with ID: {}",id);
+
         Student student = studentRepository.findById(id)
                 .orElseThrow(()-> new StudentNotFoundException(id));
+
         studentRepository.delete(student);
+
+        logger.info("Student deleted successfully with ID: {}",id);
     }
 }
