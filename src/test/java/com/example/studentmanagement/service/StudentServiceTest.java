@@ -12,10 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -183,6 +183,74 @@ public class StudentServiceTest {
 
         // Verify
         verify(studentRepository,never()).delete(any(Student.class));
+    }
+
+    @Test
+    void shouldReturnAllStudentsSuccessfully() {
+
+        // Arrange
+        Student student1= new Student(1L,"Rahul","rahul@gmail.com",21);
+        Student student2= new Student(2L, "Amit", "amit@gmail.com",23);
+
+        List<Student> students= List.of(student1, student2);
+        when(studentRepository.findAll()).thenReturn(students);
+
+        // Act
+        List<StudentResponseDto> responseDtos= studentService.getAllStudents();
+
+        // Assert
+        assertEquals(2, responseDtos.size());
+
+        assertEquals(1L, responseDtos.get(0).getId());
+        assertEquals("Rahul",responseDtos.get(0).getName());
+        assertEquals("rahul@gmail.com", responseDtos.get(0).getEmail());
+        assertEquals(21,responseDtos.get(0).getAge());
+
+        assertEquals(2L, responseDtos.get(1).getId());
+        assertEquals("Amit",responseDtos.get(1).getName());
+        assertEquals("amit@gmail.com", responseDtos.get(1).getEmail());
+        assertEquals(23,responseDtos.get(1).getAge());
+
+        // Verify
+        verify(studentRepository).findAll();
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoStudentsExist() {
+
+        // Arrange
+        when(studentRepository.findAll()).thenReturn(List.of());
+
+        // Act
+        List<StudentResponseDto> responseDtos= studentService.getAllStudents();
+
+        // Assert
+        assertTrue(responseDtos.isEmpty());
+
+        // Verify
+        verify(studentRepository).findAll();
+    }
+
+    @Test
+    void shouldReturnStudentWhenIdExists(){
+
+        // Arrange
+        Long id= 1L;
+        Student student= new Student(1L,"Rahul","rahul@gmail.com",21);
+
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+
+        // Act
+        StudentResponseDto response = studentService.getStudentById(id);
+
+        // Assert
+        assertEquals(1L,response.getId());
+        assertEquals("Rahul",response.getName());
+        assertEquals("rahul@gmail.com",response.getEmail());
+        assertEquals(21,response.getAge());
+
+        // Verify
+        verify(studentRepository).findById(id);
     }
 
 }
