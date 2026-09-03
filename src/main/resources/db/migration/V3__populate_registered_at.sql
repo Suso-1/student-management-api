@@ -1,0 +1,1 @@
+UPDATE student SET registered_at = CURRENT_TIMESTAMP WHERE registered_at IS NULL;

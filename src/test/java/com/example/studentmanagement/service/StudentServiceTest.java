@@ -34,11 +34,11 @@ public class StudentServiceTest {
 
         // Arrange
         StudentRequestDto requestDto = new StudentRequestDto(
-                "Rahul", "rahul@gmail.com", 21
+                "Rahul", "rahul@gmail.com", 21,"9876543210"
         );
 
         Student savedStudent = new Student(
-                1L, "Rahul", "rahul@gmail.com", 21
+                1L, "Rahul", "rahul@gmail.com", 21, "9876543210"
         );
 
         when(studentRepository.save(any(Student.class))).thenReturn(savedStudent);
@@ -51,6 +51,7 @@ public class StudentServiceTest {
         assertEquals("Rahul", response.getName());
         assertEquals("rahul@gmail.com", response.getEmail());
         assertEquals(21, response.getAge());
+        assertEquals("9876543210",response.getPhoneNumber());
 
         // Verify
         //verify(studentRepository).save(any(Student.class));
@@ -78,7 +79,7 @@ public class StudentServiceTest {
 
         // Arrange
         StudentRequestDto requestDto = new StudentRequestDto(
-                "Rahul", "rahul@gmail.com", 21
+                "Rahul", "rahul@gmail.com", 21, "9876543210"
         );
 
         when(studentRepository.save(any(Student.class))).thenReturn(new Student());
@@ -98,6 +99,7 @@ public class StudentServiceTest {
         assertEquals("Rahul", capturedStudent.getName());
         assertEquals("rahul@gmail.com", capturedStudent.getEmail());
         assertEquals(21, capturedStudent.getAge());
+        assertEquals("9876543210",capturedStudent.getPhoneNumber());
     }
 
     @Test
@@ -105,9 +107,9 @@ public class StudentServiceTest {
 
         // Arrange
         Long id = 1L;
-        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21);
+        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210");
 
-        Student existingStudent = new Student(1L, "Old Name", "old@gmail.com", 20);
+        Student existingStudent = new Student(1L, "Old Name", "old@gmail.com", 20, "9123456780");
 
         when(studentRepository.findById(1L)).thenReturn(Optional.of(existingStudent));
 
@@ -129,10 +131,12 @@ public class StudentServiceTest {
         assertEquals("Rahul", capturedStudent.getName());
         assertEquals("rahul@gmail.com", capturedStudent.getEmail());
         assertEquals(21, capturedStudent.getAge());
+        assertEquals("9876543210", capturedStudent.getPhoneNumber());
 
         assertEquals("Rahul", responseDto.getName());
         assertEquals("rahul@gmail.com", responseDto.getEmail());
         assertEquals(21, responseDto.getAge());
+        assertEquals("9876543210",responseDto.getPhoneNumber());
     }
 
     @Test
@@ -140,7 +144,7 @@ public class StudentServiceTest {
 
         // Arrange
         Long id = 99L;
-        StudentRequestDto requestDto= new StudentRequestDto("Rahul", "rahul@gmail.com", 21);
+        StudentRequestDto requestDto= new StudentRequestDto("Rahul", "rahul@gmail.com", 21,"9876543210");
         when(studentRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act + Assert
@@ -157,7 +161,7 @@ public class StudentServiceTest {
     void shouldDeleteStudentSuccessfully(){
         //Arrange
         Student existingStudent= new Student(
-                1L,"Rahul","rahul@gmail.com",21
+                1L,"Rahul","rahul@gmail.com",21, "9876543210"
         );
 
         when(studentRepository.findById(1L)).thenReturn(Optional.of(existingStudent));
@@ -189,8 +193,8 @@ public class StudentServiceTest {
     void shouldReturnAllStudentsSuccessfully() {
 
         // Arrange
-        Student student1= new Student(1L,"Rahul","rahul@gmail.com",21);
-        Student student2= new Student(2L, "Amit", "amit@gmail.com",23);
+        Student student1= new Student(1L,"Rahul","rahul@gmail.com",21,"9876543210");
+        Student student2= new Student(2L, "Amit", "amit@gmail.com",23, "9123456780");
 
         List<Student> students= List.of(student1, student2);
         when(studentRepository.findAll()).thenReturn(students);
@@ -205,11 +209,13 @@ public class StudentServiceTest {
         assertEquals("Rahul",responseDtos.get(0).getName());
         assertEquals("rahul@gmail.com", responseDtos.get(0).getEmail());
         assertEquals(21,responseDtos.get(0).getAge());
+        assertEquals("9876543210", responseDtos.get(0).getPhoneNumber());
 
         assertEquals(2L, responseDtos.get(1).getId());
         assertEquals("Amit",responseDtos.get(1).getName());
         assertEquals("amit@gmail.com", responseDtos.get(1).getEmail());
         assertEquals(23,responseDtos.get(1).getAge());
+        assertEquals("9123456780", responseDtos.get(1).getPhoneNumber());
 
         // Verify
         verify(studentRepository).findAll();
@@ -236,7 +242,7 @@ public class StudentServiceTest {
 
         // Arrange
         Long id= 1L;
-        Student student= new Student(1L,"Rahul","rahul@gmail.com",21);
+        Student student= new Student(1L,"Rahul","rahul@gmail.com",21, "9876543210");
 
         when(studentRepository.findById(id)).thenReturn(Optional.of(student));
 
@@ -248,6 +254,7 @@ public class StudentServiceTest {
         assertEquals("Rahul",response.getName());
         assertEquals("rahul@gmail.com",response.getEmail());
         assertEquals(21,response.getAge());
+        assertEquals("9876543210", response.getPhoneNumber());
 
         // Verify
         verify(studentRepository).findById(id);

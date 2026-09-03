@@ -5,8 +5,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
-import jakarta.validation.Valid;
-
 public class StudentRequestDto {
 
     @NotBlank(message = "name cannot be blank ")
@@ -21,12 +19,15 @@ public class StudentRequestDto {
     @Max(value=100, message = "Age must not exceed 100")
     private Integer age;
 
+    private String phoneNumber;
+
     public StudentRequestDto(){}
 
-    public StudentRequestDto(String name, String email, Integer age){
+    public StudentRequestDto(String name, String email, Integer age, String phoneNumber){
         this.name=name;
         this.email=email;
         this.age=age;
+        this.phoneNumber=phoneNumber;
     }
 
     public String getName() {
@@ -53,4 +54,7 @@ public class StudentRequestDto {
         this.age = age;
     }
 
+    public String getPhoneNumber() { return phoneNumber; }
+
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 }

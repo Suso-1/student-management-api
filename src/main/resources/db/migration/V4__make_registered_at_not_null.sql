@@ -1,0 +1,1 @@
+ALTER TABLE student MODIFY registered_at DATETIME NOT NULL;

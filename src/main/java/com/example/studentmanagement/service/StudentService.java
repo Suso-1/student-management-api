@@ -7,6 +7,7 @@ import com.example.studentmanagement.exception.StudentNotFoundException;
 import org.springframework.stereotype.Service;
 import com.example.studentmanagement.repository.StudentRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class StudentService {
     }
 
     private StudentResponseDto mapToResponseDto(Student student){
-        return new StudentResponseDto(student.getId(),student.getName(),student.getEmail(), student.getAge());
+        return new StudentResponseDto(student.getId(),student.getName(),student.getEmail(), student.getAge(), student.getPhoneNumber());
     }
 
     private Student mapToStudent(StudentRequestDto dto){
@@ -33,6 +34,8 @@ public class StudentService {
         student.setEmail(dto.getEmail());
         student.setName(dto.getName());
         student.setAge(dto.getAge());
+        student.setPhoneNumber(dto.getPhoneNumber());
+        student.setRegisteredAt(Instant.now());
 
         return student;
     }
@@ -84,6 +87,7 @@ public class StudentService {
         existingStudent.setAge(dto.getAge());
         existingStudent.setName(dto.getName());
         existingStudent.setEmail(dto.getEmail());
+        existingStudent.setPhoneNumber(dto.getPhoneNumber());
 
         Student updatedStudent = studentRepository.save(existingStudent);
 

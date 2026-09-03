@@ -5,14 +5,16 @@ public class StudentResponseDto {
     private String name;
     private String email;
     private Integer age;
+    private String phoneNumber;
 
     public StudentResponseDto(){}
 
-    public StudentResponseDto(Long id, String name, String email, Integer age){
+    public StudentResponseDto(Long id, String name, String email, Integer age, String phoneNumber){
         this.id=id;
         this.name=name;
         this.email=email;
         this.age=age;
+        this.phoneNumber=phoneNumber;
     }
     public Long getId() {
         return id;
@@ -45,5 +47,9 @@ public class StudentResponseDto {
     public void setAge(Integer age) {
         this.age = age;
     }
+
+    public String getPhoneNumber() { return phoneNumber; }
+
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
 
 }
