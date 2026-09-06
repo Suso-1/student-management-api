@@ -4,6 +4,7 @@ import com.example.studentmanagement.dto.StudentRequestDto;
 import com.example.studentmanagement.dto.StudentResponseDto;
 import com.example.studentmanagement.entity.Student;
 import com.example.studentmanagement.exception.StudentNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.example.studentmanagement.repository.StudentRepository;
 
@@ -77,23 +78,22 @@ public class StudentService {
                 .toList();
     }
 
+    @Transactional
     public StudentResponseDto updateStudent(Long id, StudentRequestDto dto) {
 
-        logger.info("Updating student with ID : {}",id);
+        logger.info("Updating student with ID : {}", id);
 
         Student existingStudent = studentRepository.findById(id)
-                .orElseThrow(()-> new StudentNotFoundException(id));
+                .orElseThrow(() -> new StudentNotFoundException(id));
 
         existingStudent.setAge(dto.getAge());
         existingStudent.setName(dto.getName());
         existingStudent.setEmail(dto.getEmail());
         existingStudent.setPhoneNumber(dto.getPhoneNumber());
 
-        Student updatedStudent = studentRepository.save(existingStudent);
+        logger.info("Student updated successfully with Student id: {}", id);
 
-        logger.info("Student updated successfully with Student id: {}",updatedStudent.getId());
-
-        return mapToResponseDto(updatedStudent);
+        return mapToResponseDto(existingStudent);
     }
 
     public void deleteStudent(Long id){

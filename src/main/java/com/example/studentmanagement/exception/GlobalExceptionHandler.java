@@ -1,8 +1,8 @@
 package com.example.studentmanagement.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -35,6 +35,11 @@ public class GlobalExceptionHandler {
        return ResponseEntity
                .status(HttpStatus.BAD_REQUEST)
                .body(errors);
+   }
+
+   @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex){
+       return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists ");
    }
 
 }
