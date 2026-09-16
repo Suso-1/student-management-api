@@ -1,0 +1,2 @@
+ALTER TABLE student
+MODIFY COLUMN department_id BIGINT NOT NULL;

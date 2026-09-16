@@ -1,9 +1,5 @@
 package com.example.studentmanagement.entity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.time.Instant;
 
@@ -24,6 +20,10 @@ public class Student {
     private String phoneNumber;
 
     private Instant registeredAt;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     public Student() {}
 
