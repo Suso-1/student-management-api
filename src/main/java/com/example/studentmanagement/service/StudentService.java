@@ -2,8 +2,11 @@ package com.example.studentmanagement.service;
 
 import com.example.studentmanagement.dto.StudentRequestDto;
 import com.example.studentmanagement.dto.StudentResponseDto;
+import com.example.studentmanagement.entity.Department;
 import com.example.studentmanagement.entity.Student;
+import com.example.studentmanagement.exception.DepartmentNotFoundException;
 import com.example.studentmanagement.exception.StudentNotFoundException;
+import com.example.studentmanagement.repository.DepartmentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.example.studentmanagement.repository.StudentRepository;
@@ -18,14 +21,17 @@ import org.slf4j.LoggerFactory;
 public class StudentService {
 
     private static final Logger logger = LoggerFactory.getLogger(StudentService.class);
-    private final StudentRepository studentRepository;
 
-    public StudentService(StudentRepository studentRepository) {
+    private final StudentRepository studentRepository;
+    private final DepartmentRepository departmentRepository;
+
+    public StudentService(StudentRepository studentRepository, DepartmentRepository departmentRepository) {
         this.studentRepository = studentRepository;
+        this.departmentRepository= departmentRepository;
     }
 
     private StudentResponseDto mapToResponseDto(Student student){
-        return new StudentResponseDto(student.getId(),student.getName(),student.getEmail(), student.getAge(), student.getPhoneNumber());
+        return new StudentResponseDto(student.getId(),student.getName(),student.getEmail(), student.getAge(), student.getPhoneNumber(),student.getDepartment().getId(),student.getDepartment().getName());
     }
 
     private Student mapToStudent(StudentRequestDto dto){
@@ -37,7 +43,7 @@ public class StudentService {
         student.setAge(dto.getAge());
         student.setPhoneNumber(dto.getPhoneNumber());
         student.setRegisteredAt(Instant.now());
-
+//        student.setDepartment(department);
         return student;
     }
 
@@ -45,7 +51,13 @@ public class StudentService {
 
         logger.info("Creating student with email: {} ", dto.getEmail());
 
+        Department department= departmentRepository.findById(dto.getDepartmentId())
+                .orElseThrow(()-> new DepartmentNotFoundException(dto.getDepartmentId())
+                        );
+
         Student student = mapToStudent(dto);
+
+        student.setDepartment(department);
 
         Student savedStudent= studentRepository.save(student);
 
@@ -85,11 +97,14 @@ public class StudentService {
 
         Student existingStudent = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException(id));
+        Department department = departmentRepository.findById(dto.getDepartmentId())
+                .orElseThrow(()-> new DepartmentNotFoundException(dto.getDepartmentId()));
 
         existingStudent.setAge(dto.getAge());
         existingStudent.setName(dto.getName());
         existingStudent.setEmail(dto.getEmail());
         existingStudent.setPhoneNumber(dto.getPhoneNumber());
+        existingStudent.setDepartment(department);
 
         logger.info("Student updated successfully with Student id: {}", id);
 

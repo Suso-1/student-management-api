@@ -42,4 +42,11 @@ public class GlobalExceptionHandler {
        return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists ");
    }
 
+    @ExceptionHandler(DepartmentNotFoundException.class)
+    public ResponseEntity<String> handleDepartmentNotFound(DepartmentNotFoundException ex) {
+       return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
 }

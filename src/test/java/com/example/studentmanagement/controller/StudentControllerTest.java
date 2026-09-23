@@ -35,8 +35,8 @@ public class StudentControllerTest {
     void shouldCreateStudentAndReturn201() throws Exception {
 
         // Arrange
-        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210");
-        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", "rahul@gmail.com", 21, "9876543210");
+        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210",1L);
+        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", "rahul@gmail.com", 21, "9876543210",1L,"Computer Science");
         String requestJson= objectMapper.writeValueAsString(requestDto);
         when(studentService.saveStudent(any(StudentRequestDto.class))).thenReturn(responseDto);
 
@@ -50,7 +50,9 @@ public class StudentControllerTest {
                 .andExpect(jsonPath("$.name").value("Rahul"))
                 .andExpect(jsonPath("$.email").value("rahul@gmail.com"))
                 .andExpect(jsonPath("$.age").value(21))
-                .andExpect(jsonPath("$.phoneNumber").value("9876543210"));
+                .andExpect(jsonPath("$.phoneNumber").value("9876543210"))
+                .andExpect(jsonPath("$.departmentId").value(1))
+                .andExpect(jsonPath("$.departmentName").value("Computer Science"));
 
         // Verify
         verify(studentService).saveStudent(any(StudentRequestDto.class));
@@ -60,7 +62,7 @@ public class StudentControllerTest {
     void shouldRejectInvalidStudentRequest() throws Exception {
 
         // Arrange
-        StudentRequestDto requestDto= new StudentRequestDto("","wrongEmail",17, "9876543210");
+        StudentRequestDto requestDto= new StudentRequestDto("","wrongEmail",17, "9876543210",1L);
         String requestJson= objectMapper.writeValueAsString(requestDto);
 
         // Act + Assert
@@ -93,7 +95,7 @@ public class StudentControllerTest {
 
         // Arrange
         Long id= 1L;
-        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", "rahul@gmail.com", 21, "9876543210");
+        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", "rahul@gmail.com", 21, "9876543210",1L,"Computer Science");
         when(studentService.getStudentById(id)).thenReturn(responseDto);
 
         // Act + Assert
@@ -103,7 +105,9 @@ public class StudentControllerTest {
                 .andExpect(jsonPath("$.name").value("Rahul"))
                 .andExpect(jsonPath("$.email").value("rahul@gmail.com"))
                 .andExpect(jsonPath("$.age").value(21))
-                .andExpect(jsonPath("$.phoneNumber").value("9876543210"));
+                .andExpect(jsonPath("$.phoneNumber").value("9876543210"))
+                .andExpect(jsonPath("$.departmentId").value(1))
+                .andExpect(jsonPath("$.departmentName").value("Computer Science"));
 
         // Verify
         verify(studentService).getStudentById(id);
@@ -113,8 +117,8 @@ public class StudentControllerTest {
     void shouldReturnAllStudentsSuccessfully() throws Exception {
 
         // Arrange
-        StudentResponseDto responseDto1= new StudentResponseDto(1L,"Rahul","rahul@gmail.com",21, "9876543210");
-        StudentResponseDto responseDto2= new StudentResponseDto(2L,"Amit","amit@gmail.com",23, "9123456780");
+        StudentResponseDto responseDto1= new StudentResponseDto(1L,"Rahul","rahul@gmail.com",21, "9876543210",1L,"Computer Science");
+        StudentResponseDto responseDto2= new StudentResponseDto(2L,"Amit","amit@gmail.com",23, "9123456780",2L,"Information Tech");
         List<StudentResponseDto> studentResponseDtoList= List.of(responseDto1,responseDto2);
 
         when(studentService.getAllStudents()).thenReturn(studentResponseDtoList);
@@ -129,12 +133,17 @@ public class StudentControllerTest {
                 .andExpect(jsonPath("$[0].email").value("rahul@gmail.com"))
                 .andExpect(jsonPath("$[0].age").value(21))
                 .andExpect(jsonPath("$[0].phoneNumber").value("9876543210"))
+                .andExpect(jsonPath("$[0].departmentId").value(1))
+                .andExpect(jsonPath("$[0].departmentName").value("Computer Science"))
 
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].name").value("Amit"))
                 .andExpect(jsonPath("$[1].email").value("amit@gmail.com"))
                 .andExpect(jsonPath("$[1].age").value(23))
-                .andExpect(jsonPath("$[1].phoneNumber").value("9123456780"));
+                .andExpect(jsonPath("$[1].phoneNumber").value("9123456780"))
+                .andExpect(jsonPath("$[1].departmentId").value(2))
+                .andExpect(jsonPath("$[1].departmentName").value("Information Tech"));
+
 
 
         // Verify
@@ -161,8 +170,8 @@ public class StudentControllerTest {
 
         // Arrange
         Long id= 1L;
-        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210");
-        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", "rahulnew@gmail.com", 21, "9876543210");
+        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210",1L);
+        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", "rahulnew@gmail.com", 21, "9876543210",1L,"Computer Science");
         String requestJson= objectMapper.writeValueAsString(requestDto);
         when(studentService.updateStudent(eq(id), any(StudentRequestDto.class))).thenReturn(responseDto);
 
@@ -176,7 +185,9 @@ public class StudentControllerTest {
                 .andExpect(jsonPath("$.name").value("Rahul"))
                 .andExpect(jsonPath("$.email").value("rahulnew@gmail.com"))
                 .andExpect(jsonPath("$.age").value(21))
-                .andExpect(jsonPath("$.phoneNumber").value("9876543210"));
+                .andExpect(jsonPath("$.phoneNumber").value("9876543210"))
+                .andExpect(jsonPath("$.departmentId").value(1))
+                .andExpect(jsonPath("$.departmentName").value("Computer Science"));
 
         // Verify
         verify(studentService).updateStudent(eq(id), any(StudentRequestDto.class));
@@ -186,7 +197,7 @@ public class StudentControllerTest {
     void shouldReturn404WhenUpdatingNonExistingStudent() throws Exception {
         // Arrange
         Long id= 99L;
-        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210");
+        StudentRequestDto requestDto = new StudentRequestDto("Rahul", "rahul@gmail.com", 21, "9876543210",1L);
         String requestJson= objectMapper.writeValueAsString(requestDto);
         when(studentService.updateStudent(eq(id),any(StudentRequestDto.class))).thenThrow(new StudentNotFoundException(id));
 
@@ -226,5 +237,20 @@ public class StudentControllerTest {
 
         // Verify
         verify(studentService).deleteStudent(id);
+    }
+
+    @Test
+    void shouldRejectRequestWhenDepartmentIdIsMissing() throws Exception {
+        String requestJson = """
+                {"name": "Rahul","email": "rahul@gmail.com","age": 21,"phoneNumber": "9876543210"}
+                """;
+
+        mockMvc.perform(post("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                        .andExpect(status().isBadRequest());
+
+        verify(studentService, never())
+                        .saveStudent(any(StudentRequestDto.class));
     }
 }

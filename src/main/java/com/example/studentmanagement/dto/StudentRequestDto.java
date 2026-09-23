@@ -1,9 +1,6 @@
 package com.example.studentmanagement.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
 public class StudentRequestDto {
 
@@ -21,13 +18,17 @@ public class StudentRequestDto {
 
     private String phoneNumber;
 
+    @NotNull(message = "Department Id is required")
+    private Long departmentId;
+
     public StudentRequestDto(){}
 
-    public StudentRequestDto(String name, String email, Integer age, String phoneNumber){
+    public StudentRequestDto(String name, String email, Integer age, String phoneNumber, Long departmentId){
         this.name=name;
         this.email=email;
         this.age=age;
         this.phoneNumber=phoneNumber;
+        this.departmentId=departmentId;
     }
 
     public String getName() {
@@ -57,4 +58,12 @@ public class StudentRequestDto {
     public String getPhoneNumber() { return phoneNumber; }
 
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
+    }
 }

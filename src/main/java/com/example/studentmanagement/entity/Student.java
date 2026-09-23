@@ -78,4 +78,8 @@ public class Student {
     public void setRegisteredAt(Instant registeredAt) {
         this.registeredAt = registeredAt;
     }
+
+    public Department getDepartment() {return department;}
+
+    public void setDepartment(Department department) {this.department = department;}
 }
