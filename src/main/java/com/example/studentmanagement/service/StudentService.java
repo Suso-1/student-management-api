@@ -11,8 +11,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.example.studentmanagement.repository.StudentRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.Instant;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,17 +78,21 @@ public class StudentService {
         return mapToResponseDto(student);
     }
 
-    public List<StudentResponseDto> getAllStudents() {
+    public Page<StudentResponseDto> getAllStudents(Long departmentId, Pageable pageable) {
 
-        logger.info("Fetching all students.");
+        logger.info(
+                "Fetching students. departmentId: {}, page: {}, size: {}",
+                departmentId, pageable.getPageNumber(), pageable.getPageSize());
 
-        List<Student> students = studentRepository.findAll();
+        Page<Student> students;
 
-        logger.info("Retrieved {} students ",students.size());
+        if (departmentId != null) {
+            students = studentRepository.findByDepartmentId(departmentId, pageable);
+        } else {students = studentRepository.findAll(pageable);}
 
-        return students.stream()
-                .map(this::mapToResponseDto)
-                .toList();
+        logger.info("Retrieved {} students", students.getNumberOfElements());
+
+        return students.map(this::mapToResponseDto);
     }
 
     @Transactional
@@ -121,5 +126,16 @@ public class StudentService {
         studentRepository.delete(student);
 
         logger.info("Student deleted successfully with ID: {}",id);
+    }
+
+    public StudentResponseDto getStudentByEmail(String email) {
+        logger.info("Fetching student with email: {}", email);
+
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new StudentNotFoundException(
+                        "Student not found with email: " + email
+                ));
+
+        return mapToResponseDto(student);
     }
 }

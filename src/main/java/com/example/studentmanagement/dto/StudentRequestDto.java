@@ -18,7 +18,7 @@ public class StudentRequestDto {
 
     private String phoneNumber;
 
-    @NotNull(message = "Department Id is required")
+    @NotNull(message = "Department ID is required")
     private Long departmentId;
 
     public StudentRequestDto(){}

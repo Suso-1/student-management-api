@@ -7,17 +7,18 @@ import com.example.studentmanagement.service.StudentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
 
 @WebMvcTest(StudentController.class)
 public class StudentControllerTest {
@@ -117,52 +118,106 @@ public class StudentControllerTest {
     void shouldReturnAllStudentsSuccessfully() throws Exception {
 
         // Arrange
-        StudentResponseDto responseDto1= new StudentResponseDto(1L,"Rahul","rahul@gmail.com",21, "9876543210",1L,"Computer Science");
-        StudentResponseDto responseDto2= new StudentResponseDto(2L,"Amit","amit@gmail.com",23, "9123456780",2L,"Information Tech");
-        List<StudentResponseDto> studentResponseDtoList= List.of(responseDto1,responseDto2);
+        StudentResponseDto responseDto1 =
+                new StudentResponseDto(1L, "Rahul", "rahul@gmail.com", 21, "9876543210", 1L, "Computer Science");
 
-        when(studentService.getAllStudents()).thenReturn(studentResponseDtoList);
+        StudentResponseDto responseDto2 =
+                new StudentResponseDto(2L, "Amit", "amit@gmail.com", 23, "9123456780", 2L, "Information Tech");
+
+        Page<StudentResponseDto> page =
+                new PageImpl<>(
+                        List.of(responseDto1, responseDto2),
+                        PageRequest.of(0, 2), 2);
+
+        when(studentService.getAllStudents(isNull(),any(Pageable.class)))
+                .thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/students"))
+        mockMvc.perform(get("/api/students")
+                        .param("page", "0").param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
 
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Rahul"))
-                .andExpect(jsonPath("$[0].email").value("rahul@gmail.com"))
-                .andExpect(jsonPath("$[0].age").value(21))
-                .andExpect(jsonPath("$[0].phoneNumber").value("9876543210"))
-                .andExpect(jsonPath("$[0].departmentId").value(1))
-                .andExpect(jsonPath("$[0].departmentName").value("Computer Science"))
+                .andExpect(jsonPath("$.content.length()").value(2))
 
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].name").value("Amit"))
-                .andExpect(jsonPath("$[1].email").value("amit@gmail.com"))
-                .andExpect(jsonPath("$[1].age").value(23))
-                .andExpect(jsonPath("$[1].phoneNumber").value("9123456780"))
-                .andExpect(jsonPath("$[1].departmentId").value(2))
-                .andExpect(jsonPath("$[1].departmentName").value("Information Tech"));
+                .andExpect(jsonPath("$.content[0].id").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Rahul"))
+                .andExpect(jsonPath("$.content[0].email").value("rahul@gmail.com"))
+                .andExpect(jsonPath("$.content[0].age").value(21))
+                .andExpect(jsonPath("$.content[0].phoneNumber").value("9876543210"))
+                .andExpect(jsonPath("$.content[0].departmentId").value(1))
+                .andExpect(jsonPath("$.content[0].departmentName").value("Computer Science"))
 
+                .andExpect(jsonPath("$.content[1].id").value(2))
+                .andExpect(jsonPath("$.content[1].name").value("Amit"))
+                .andExpect(jsonPath("$.content[1].email").value("amit@gmail.com"))
+                .andExpect(jsonPath("$.content[1].age").value(23))
+                .andExpect(jsonPath("$.content[1].phoneNumber").value("9123456780"))
+                .andExpect(jsonPath("$.content[1].departmentId").value(2))
+                .andExpect(jsonPath("$.content[1].departmentName").value("Information Tech"))
 
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.size").value(2));
 
-        // Verify
-        verify(studentService).getAllStudents();
+        verify(studentService).getAllStudents(isNull(),any(Pageable.class));
     }
 
     @Test
-    void shouldReturnEmptyListWhenNoStudentsExist() throws Exception {
+    void shouldReturnStudentsByDepartment() throws Exception {
 
         // Arrange
-        when(studentService.getAllStudents()).thenReturn(List.of());
+        StudentResponseDto responseDto1 =
+                new StudentResponseDto(1L, "Rahul", "rahul@gmail.com", 21, "9876543210", 1L, "Computer Science");
+
+        StudentResponseDto responseDto2 = new StudentResponseDto(2L, "Amit", "amit@gmail.com", 22, "9123456780", 1L, "Computer Science");
+
+        Page<StudentResponseDto> page =
+                new PageImpl<>(
+                        List.of(responseDto1, responseDto2), PageRequest.of(0, 2), 2);
+
+        when(studentService.getAllStudents(eq(1L), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/students"))
+        mockMvc.perform(
+                        get("/api/students")
+                                .param("departmentId", "1")
+                                .param("page", "0")
+                                .param("size", "2")
+                )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].name").value("Rahul"))
+                .andExpect(jsonPath("$.content[0].departmentId").value(1))
+                .andExpect(jsonPath("$.content[1].name").value("Amit"))
+                .andExpect(jsonPath("$.content[1].departmentId").value(1))
+                .andExpect(jsonPath("$.totalElements").value(2));
 
         // Verify
-        verify(studentService).getAllStudents();
+        verify(studentService).getAllStudents(eq(1L), any(Pageable.class));
+    }
+    @Test
+    void shouldReturnEmptyPageWhenNoStudentsExist() throws Exception {
+
+        Page<StudentResponseDto> emptyPage =
+                new PageImpl<>(
+                        List.of(),
+                        PageRequest.of(0, 10),
+                        0
+                );
+
+        when(studentService.getAllStudents(isNull(),any(Pageable.class)))
+                .thenReturn(emptyPage);
+
+        mockMvc.perform(get("/api/students")
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0));
+
+        verify(studentService).getAllStudents(isNull(),any(Pageable.class));
     }
 
     @Test
@@ -248,9 +303,66 @@ public class StudentControllerTest {
         mockMvc.perform(post("/api/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
-                        .andExpect(status().isBadRequest());
+                        .andExpect(status().isBadRequest())
+                        .andExpect(jsonPath("$.message")
+                            .value("Validation failed"))
+                        .andExpect(jsonPath("$.errors.departmentId")
+                            .value("Department ID is required"));
 
         verify(studentService, never())
                         .saveStudent(any(StudentRequestDto.class));
+    }
+
+    @Test
+    void shouldReturnStudentWhenEmailExists() throws Exception {
+        String email="rahul@gmail.com";
+        StudentResponseDto responseDto= new StudentResponseDto(1L,"Rahul", email, 21, "9876543210",1L,"Computer Science");
+        when(studentService.getStudentByEmail(email)).thenReturn(responseDto);
+
+        mockMvc.perform(get("/api/students/email/rahul@gmail.com"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email")
+                        .value(email))
+                .andExpect(jsonPath("$.departmentId")
+                        .value(1));
+    }
+
+    @Test
+    void shouldReturn404WhenEmailDoesNotExist() throws Exception {
+
+        when(studentService.getStudentByEmail("unknown@gmail.com"))
+                .thenThrow(new StudentNotFoundException("Student not found with email: unknown@gmail.com"));
+
+        mockMvc.perform(get("/api/students/email/unknown@gmail.com"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                .value("Student not found with email: unknown@gmail.com"));
+    }
+
+    @Test
+    void shouldSupportSortingStudentsByName() throws Exception {
+
+        StudentResponseDto responseDto1 =
+                new StudentResponseDto(1L, "Amit", "amit@gmail.com", 22, "9876543211", 1L, "Computer Science");
+
+        StudentResponseDto responseDto2 =
+                new StudentResponseDto(2L, "Rahul", "rahul@gmail.com", 21, "9876543210", 1L, "Computer Science");
+
+        Page<StudentResponseDto> page =
+                new PageImpl<>(List.of(responseDto1, responseDto2),
+                        PageRequest.of(0, 2, Sort.by("name").ascending()), 2);
+
+        when(studentService.getAllStudents(isNull(),any(Pageable.class))).thenReturn(page);
+
+        mockMvc.perform(get("/api/students")
+                        .param("page", "0")
+                        .param("size", "2")
+                        .param("sort", "name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].name").value("Amit"))
+                .andExpect(jsonPath("$.content[1].name").value("Rahul"))
+                .andExpect(jsonPath("$.totalElements").value(2));
+
+        verify(studentService).getAllStudents(isNull(),any(Pageable.class));
     }
 }

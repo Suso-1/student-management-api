@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -216,7 +217,7 @@ public class StudentServiceTest {
         verify(studentRepository,never()).delete(any(Student.class));
     }
 
-    @Test
+    /*@Test
     void shouldReturnAllStudentsSuccessfully() {
 
         // Arrange
@@ -256,9 +257,9 @@ public class StudentServiceTest {
 
         // Verify
         verify(studentRepository).findAll();
-    }
+    }*/
 
-    @Test
+    /*@Test
     void shouldReturnEmptyListWhenNoStudentsExist() {
 
         // Arrange
@@ -272,7 +273,7 @@ public class StudentServiceTest {
 
         // Verify
         verify(studentRepository).findAll();
-    }
+    }*/
 
     @Test
     void shouldReturnStudentWhenIdExists(){
@@ -299,6 +300,178 @@ public class StudentServiceTest {
 
         // Verify
         verify(studentRepository).findById(id);
+    }
+
+    @Test
+    void shouldReturnStudentWhenEmailExists() {
+        String email = "rahul@gmail.com";
+
+        Department department =
+                new Department(1L, "Computer Science");
+
+        Student student =
+                new Student(
+                        1L,
+                        "Rahul",
+                        email,
+                        21,
+                        "9876543210"
+                );
+
+        student.setDepartment(department);
+
+        when(studentRepository.findByEmail(email))
+                .thenReturn(Optional.of(student));
+
+        StudentResponseDto response =
+                studentService.getStudentByEmail(email);
+
+        verify(studentRepository).findByEmail(email);
+
+        assertEquals(1L, response.getId());
+        assertEquals("Rahul", response.getName());
+        assertEquals(email, response.getEmail());
+        assertEquals(1L, response.getDepartmentId());
+        assertEquals("Computer Science", response.getDepartmentName());
+    }
+
+    @Test
+    void shouldThrowStudentNotFoundExceptionWhenEmailDoesNotExist() {
+
+        String email = "unknown@gmail.com";
+
+        when(studentRepository.findByEmail(email))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                StudentNotFoundException.class,
+                () -> studentService.getStudentByEmail(email)
+        );
+
+        verify(studentRepository).findByEmail(email);
+    }
+
+    @Test
+    void shouldReturnPaginatedStudentsSuccessfully() {
+
+        Pageable pageable = PageRequest.of(0, 2);
+
+        Department department =
+                new Department(1L, "Computer Science");
+
+        Student student1 =
+                new Student(1L, "Rahul", "rahul@gmail.com", 21, "9876543210");
+
+        Student student2 =
+                new Student(2L,"Amit", "amit@gmail.com", 22, "9876543211");
+
+        student1.setDepartment(department);
+        student2.setDepartment(department);
+
+        Page<Student> studentPage = new PageImpl<>(
+                        List.of(student1, student2), pageable,
+                        2);
+
+        when(studentRepository.findAll(pageable))
+                .thenReturn(studentPage);
+
+        Page<StudentResponseDto> result =
+                studentService.getAllStudents(null,pageable);
+
+        verify(studentRepository).findAll(pageable);
+        verify(studentRepository, never()).findByDepartmentId(anyLong(), any(Pageable.class));
+
+        assertEquals(2, result.getContent().size());
+        assertEquals(2, result.getTotalElements());
+        assertEquals(1, result.getTotalPages());
+        assertEquals("Rahul", result.getContent().get(0).getName());
+    }
+
+    @Test
+    void shouldReturnStudentsByDepartmentSuccessfully() {
+
+        // Arrange
+        Long departmentId = 1L;
+
+        Pageable pageable = PageRequest.of(0, 2);
+
+        Department department =
+                new Department(1L, "Computer Science");
+
+        Student student1 =
+                new Student(1L, "Rahul", "rahul@gmail.com", 21, "9876543210");
+
+        Student student2 =
+                new Student(2L, "Amit", "amit@gmail.com", 22, "9876543211");
+
+        student1.setDepartment(department);
+        student2.setDepartment(department);
+
+        Page<Student> studentPage = new PageImpl<>(List.of(student1, student2), pageable, 2);
+
+        when(studentRepository.findByDepartmentId(departmentId, pageable)).thenReturn(studentPage);
+
+        // Act
+        Page<StudentResponseDto> result = studentService.getAllStudents(departmentId, pageable);
+
+        // Assert
+        assertEquals(2, result.getContent().size());
+        assertEquals(2, result.getTotalElements());
+        assertEquals("Rahul", result.getContent().get(0).getName());
+        assertEquals("Amit", result.getContent().get(1).getName());
+
+        // Verify
+        verify(studentRepository).findByDepartmentId(departmentId, pageable);
+
+        verify(studentRepository, never()).findAll(any(Pageable.class));
+    }
+    @Test
+    void shouldReturnEmptyPageWhenNoStudentsExist() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<Student> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+        when(studentRepository.findAll(pageable)).thenReturn(emptyPage);
+
+        Page<StudentResponseDto> result = studentService.getAllStudents(null,pageable);
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
+
+        verify(studentRepository).findAll(pageable);
+    }
+
+    @Test
+    void shouldReturnStudentsSortedByNameAscending() {
+
+        Pageable pageable =
+                PageRequest.of(0, 2, Sort.by("name").ascending());
+
+        Department department = new Department(1L, "Computer Science");
+
+        Student student1 =
+                new Student(1L, "Amit", "amit@gmail.com", 22, "9876543211");
+
+        Student student2 =
+                new Student(2L, "Rahul", "rahul@gmail.com", 21, "9876543210");
+
+        student1.setDepartment(department);
+        student2.setDepartment(department);
+
+        Page<Student> studentPage =
+                new PageImpl<>(List.of(student1, student2), pageable, 2);
+
+        when(studentRepository.findAll(pageable)).thenReturn(studentPage);
+
+        Page<StudentResponseDto> result = studentService.getAllStudents(null,pageable);
+
+        verify(studentRepository).findAll(pageable);
+
+        assertEquals("Amit", result.getContent().get(0).getName());
+        assertEquals("Rahul", result.getContent().get(1).getName());
+
+        assertEquals(Sort.by("name").ascending(), pageable.getSort());
     }
 
 }

@@ -7,9 +7,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -53,6 +56,12 @@ public class StudentController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<StudentResponseDto> getStudentByEmail(@PathVariable String email){
+        StudentResponseDto responseDto= studentService.getStudentByEmail(email);
+        return ResponseEntity.ok(responseDto);
+    }
+
     @Operation(
             summary = "Get all students",
             description = "Retrieves all the students from the database."
@@ -62,11 +71,10 @@ public class StudentController {
             description = "Students retrieved successfully."
     )
     @GetMapping
-    public ResponseEntity<List<StudentResponseDto>> getAllStudents() {
+    public ResponseEntity<Page<StudentResponseDto>> getAllStudents(
+            @RequestParam(required = false) Long departmentId, Pageable pageable) {
 
-        List<StudentResponseDto> responseDtos= studentService.getAllStudents();
-
-        return ResponseEntity.ok(responseDtos);
+        return ResponseEntity.ok(studentService.getAllStudents(departmentId, pageable));
     }
 
     @Operation(
