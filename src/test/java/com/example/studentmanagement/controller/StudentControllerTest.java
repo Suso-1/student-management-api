@@ -6,21 +6,24 @@ import com.example.studentmanagement.exception.StudentNotFoundException;
 import com.example.studentmanagement.service.StudentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.example.studentmanagement.security.JwtService;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
 @WebMvcTest(StudentController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class StudentControllerTest {
 
     @Autowired
@@ -31,6 +34,11 @@ public class StudentControllerTest {
 
     @MockitoBean
     private StudentService studentService;
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Test
     void shouldCreateStudentAndReturn201() throws Exception {
@@ -155,10 +163,16 @@ public class StudentControllerTest {
                 .andExpect(jsonPath("$.content[1].departmentId").value(2))
                 .andExpect(jsonPath("$.content[1].departmentName").value("Information Tech"))
 
+//                .andExpect(jsonPath("$.totalElements").value(2))
+//                .andExpect(jsonPath("$.totalPages").value(1))
+//                .andExpect(jsonPath("$.number").value(0))
+//                .andExpect(jsonPath("$.size").value(2));
+        .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(2))
                 .andExpect(jsonPath("$.totalElements").value(2))
                 .andExpect(jsonPath("$.totalPages").value(1))
-                .andExpect(jsonPath("$.number").value(0))
-                .andExpect(jsonPath("$.size").value(2));
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(true));
 
         verify(studentService).getAllStudents(isNull(),any(Pageable.class));
     }
@@ -365,4 +379,13 @@ public class StudentControllerTest {
 
         verify(studentService).getAllStudents(isNull(),any(Pageable.class));
     }
+
+//    @Test
+//    void generatePasswordHash() {
+//        PasswordEncoder encoder = new BCryptPasswordEncoder();
+//
+//        System.out.println(
+//                encoder.encode("admin123")
+//        );
+//    }
 }

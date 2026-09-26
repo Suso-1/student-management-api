@@ -1,5 +1,6 @@
 package com.example.studentmanagement.controller;
 
+import com.example.studentmanagement.dto.PageResponse;
 import com.example.studentmanagement.dto.StudentRequestDto;
 import com.example.studentmanagement.dto.StudentResponseDto;
 import com.example.studentmanagement.service.StudentService;
@@ -71,10 +72,23 @@ public class StudentController {
             description = "Students retrieved successfully."
     )
     @GetMapping
-    public ResponseEntity<Page<StudentResponseDto>> getAllStudents(
+    public ResponseEntity<PageResponse<StudentResponseDto>> getAllStudents(
             @RequestParam(required = false) Long departmentId, Pageable pageable) {
 
-        return ResponseEntity.ok(studentService.getAllStudents(departmentId, pageable));
+        Page<StudentResponseDto> page = studentService.getAllStudents(departmentId, pageable);
+
+        PageResponse<StudentResponseDto> response =
+                new PageResponse<>(
+                        page.getContent(),
+                        page.getNumber(),
+                        page.getSize(),
+                        page.getTotalElements(),
+                        page.getTotalPages(),
+                        page.isFirst(),
+                        page.isLast()
+                );
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(

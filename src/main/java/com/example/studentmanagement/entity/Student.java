@@ -21,7 +21,7 @@ public class Student {
 
     private Instant registeredAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
 
